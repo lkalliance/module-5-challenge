@@ -13,6 +13,7 @@ $(document).ready( function() {
   console.log(dDate);
 
   // call a function to draw the page
+  let jHours = drawCal();
 
   // attach the delegated listener to the container div
   // it should save a 
@@ -26,26 +27,51 @@ $(document).ready( function() {
 function drawCal() {
   // This function clears out the calendar and re-draws it
 
+  let hours = [];
+
   // empty the calendar
   jCal.empty();
 
   // get the saved data out of local storage
-  let rawData = localStorage.getItem("events").toString();
-  let parsedData = (rawData.length) > 1?rawData.json():false;
+  // let rawData = localStorage.getItem("events");
+  // let parsedData = (rawData.length > 1)?rawData.json():false;
 
-  // iterate through business hours and create new hour div
-  for (let i = 0; i < 24; i++) {
-    hours[i] = new hour(currHour);
-  }
+  // iterate through the hours of the day and render the ones as needed
+  /* -- go from 0 to 24 and if it's within given bounds:
+  create the div
+  append the div
+  push a reference to the div onto hours array */
 
-  // iterate through the returned hours and attach to the calendar body
-  for (let i = 0; i < hours.length; i++) {
-    if (hours[i].render) jCal.append(hours[i].hr);
-  }
+  // return an array of the hour elements
+  return hours;
+}
 
-  // grab and parse the stored calendar events
- 
-} 
+function updateTime(hours, currHour) {
+  // This function updates the color coding of the hour divs
+  // parameter "hours" is an array of the divs
+  // parameter "currHour" is our current hour
+
+}
+
+function saveEvent(e) {
+  // This listener callback saves the edited calendar hour
+
+  e.preventDefault();
+
+  // determine which calendar hour was saved
+
+  // disable that text field and dim that hour while saving
+  // (perhaps remove the listener while it does this?)
+
+  // get data from local storare and parse it
+
+  // overwrite the text content of the saved hour
+
+  // put stringified data back into local storage
+
+  // (perhaps put the listener back on?)
+
+}
 
 
 
