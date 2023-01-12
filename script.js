@@ -16,19 +16,18 @@ $(document).ready( function() {
   jDate.text(dDate.format('dddd, MMMM DD, YYYY'));
 
   // draw the calendar's basic structure
+  // value returned is an array of the hour divs
   hourDivs = drawCal(jCal);
 
   // update the calendar to reflect the current time
   updateTime(hourDivs, dDate.hour());
 
-  // create and store an array of events
-  let emptyEvents = [];
-  for ( let i = 0; i < hourDivs.length; i++ ) {
-    // they all start out false
-    emptyEvents.push(false);
-  }
-  // render the events, and get back the updated list
-  let hourEvents = renderEvents(emptyEvents);
+  // extract the localStorage
+  // value returned is an array of events
+  let hourEvents = extractStored(hourDivs);
+
+  // place the events into the calendar
+  renderEvents(hourDivs, hourEvents);
 
   // attach the delegated listener to the container div
   jCal.on("click", "button", function(e) {
@@ -43,22 +42,13 @@ $(document).ready( function() {
 
 
 function drawCal(jCalendar) {
-  // This function clears out the calendar and re-draws it
+  // This function clears out the calendar and re-draws its structure
   // parameter "calendar" is a reference to the calendar container
 
   let hours = [];
 
   // empty the calendar
   jCalendar.empty();
-
-  // get the saved data out of local storage
-  let rawData;
-  if (localStorage.getItem("events")) {
-    rawData = localStorage.getItem("events");
-    let parsedData = (rawData.length > 1)?rawData.json():false;
-    console.log(rawData);
-  }
-  else rawData = false;
 
   // iterate through the hours of the day and render the ones as needed
   let jHourDiv, jHourLabel, jHourText, jHourBtn;
@@ -91,6 +81,7 @@ function drawCal(jCalendar) {
       // add a reference to the div in the returned array
       hours.push(jHourDiv);
     }
+    else hours.push(false);
   }
 
   // return an array of the hour elements
@@ -102,24 +93,30 @@ function updateTime(hours, currHour) {
   // parameter "hours" is an array of the divs
   // parameter "currHour" is our current hour
 
+  console.log(hours);
+
   let thisHour;
 
   // iterate through the array of divs
   for (i = 0; i<hours.length; i++) {
-    // get the div's hour number from its id
-    thisHour = hours[i].attr("id").split("-")[1];
 
-    // compare the hour, and toggle the appropriate class
-    hours[i].toggleClass("past", (thisHour < currHour));
-    hours[i].toggleClass("present", (thisHour == currHour));
-    hours[i].toggleClass("future", (thisHour > currHour));
+    console.log(hours[i]);
+    // get the div's hour number from its id
+    if (hours[i]) {
+      thisHour = hours[i].attr("id").split("-")[1];
+      // compare the hour, and toggle the appropriate class
+      hours[i].toggleClass("past", (thisHour < currHour));
+      hours[i].toggleClass("present", (thisHour == currHour));
+      hours[i].toggleClass("future", (thisHour > currHour));
+    }
   }
 }
 
-function saveEvent(e, hours) {
+function saveEvent(e, hours, events) {
   // This listener callback saves the edited calendar hour
   // parameter "e" is the event object
   // parameter "hours" is the array of hour divs
+  // parameter "events" is the array of hour events
 
   e.preventDefault();
 
@@ -127,31 +124,42 @@ function saveEvent(e, hours) {
   // determine which calendar hour was saved
   clickedHour = e.currentTarget.parentNode.id.split("-")[1];
   console.log(clickedHour);
+  
+  // store the contents of the textarea in the events array
+  events[clickedHour] = hours[clickedHour].children("textarea").val();
 
-  // disable that text field and dim that hour while saving
-  // (perhaps remove the listener while it does this?)
+  console.log(hours[clickedHour].children("textarea").val());
+  localStorage.setItem("events", JSON.stringify(events));
 
-  let rawData, parsedData;
-  // do events exist in localStorage?
-  // if (!localStorage.getItem("events")) {
-   // parsedData = [];
-    // iterate over the hours div, store values for each hour
-   // for (let i = 0; i < hours.length; )
-  // }
+}
 
+function extractStored(hours) {
+  // This function converts the stored events into an array
+  // parameter "hours" is the array of hourly divs
 
-  // overwrite the text content of the saved hour
+  let emptyArray = [];
+  for ( let i = 0; i < 24; i++ ) emptyArray.push(false);
 
-  // put stringified data back into local storage
+  // get the raw data and parse it
+  let storedEvents = localStorage.getItem("events");
+  let parsedEvents = storedEvents?JSON.parse(storedEvents):emptyArray;
 
-  // (perhaps put the listener back on?)
-
+  return parsedEvents;
 }
 
 function renderEvents(hours, events) {
   // This function adds stored events to the calendar
   // parameter "hours" is the array of hour divs
   // parameter "events" is the array of events
+
+  // now iterate over the divs and place the text there
+  let jHourText;
+  for ( let i = 0; i < hours.length; i++ ) {
+    if ( hours[i] ) {
+      jHourText = $(hours[i]).children("textarea")[0];
+      jHourText.textContent = (events[i]?events[i]:"");
+    }
+  }
 }
 
 
