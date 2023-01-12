@@ -10,10 +10,12 @@ $(document).ready( function() {
   const jCal = $("#calendar");     // a reference to the calendar body
   const jDate = $("#currentDay");    // will hold a reference to the date
   let hourDivs;
+  let dCurrentHour;
   
   // determine today's date and place it on the page
   let dDate = dayjs();
   jDate.text(dDate.format('dddd, MMMM DD, YYYY'));
+  dCurrentHour = dDate.hour();
 
   // draw the calendar's basic structure
   // value returned is an array of the hour divs
@@ -35,9 +37,15 @@ $(document).ready( function() {
     saveEvent(e, hourDivs, hourEvents);
   });
 
-  // once everything is in place, start a tick-tock timer:
-  // if the hour has changed, call the functino to draw the page
-
+  // once a second check if there is a new hour
+  let tickTock = setInterval( function() {
+    dDate = dayjs();
+    // is the current hour greater than the saved hour?
+    if (dDate.hour() != dCurrentHour) {
+      dCurrentHour = dDate.hour();
+      updateTime(hourDivs, dCurrentHour);
+    }
+  }, 1000);
 })
 
 
@@ -93,14 +101,10 @@ function updateTime(hours, currHour) {
   // parameter "hours" is an array of the divs
   // parameter "currHour" is our current hour
 
-  console.log(hours);
-
   let thisHour;
 
   // iterate through the array of divs
   for (i = 0; i<hours.length; i++) {
-
-    console.log(hours[i]);
     // get the div's hour number from its id
     if (hours[i]) {
       thisHour = hours[i].attr("id").split("-")[1];
@@ -123,20 +127,16 @@ function saveEvent(e, hours, events) {
   let clickedHour;
   // determine which calendar hour was saved
   clickedHour = e.currentTarget.parentNode.id.split("-")[1];
-  console.log(clickedHour);
-  
   // store the contents of the textarea in the events array
   events[clickedHour] = hours[clickedHour].children("textarea").val();
-
-  console.log(hours[clickedHour].children("textarea").val());
   localStorage.setItem("events", JSON.stringify(events));
-
 }
 
 function extractStored(hours) {
   // This function converts the stored events into an array
   // parameter "hours" is the array of hourly divs
 
+  // create an empty array in case there are no saved events
   let emptyArray = [];
   for ( let i = 0; i < 24; i++ ) emptyArray.push(false);
 
