@@ -57,14 +57,7 @@ $(document).ready( function() {
   // attach a listener to the "Clear events" button
   jClear.on("click", function(e) {
     e.preventDefault();
-    // empty out the main events array
-    for ( i = 0; i < hourEvents.length; i++ ) {
-      hourEvents[i] = false;
-    }
-    // save the empty array to localStorage
-    localStorage.setItem("events", JSON.stringify(hourEvents));
-    // re-render the calendar
-    renderEvents(hourDivs, hourEvents);
+    emptyEvents(hourDivs, hourEvents);
   })
 
   // once-a-second check if there is a new hour
@@ -229,24 +222,21 @@ function renderEvents(hours, events) {
   for ( let i = 0; i < hours.length; i++ ) {
     if ( hours[i] ) {
       jHourText = $(hours[i]).children("textarea")[0];
-      console.log(jHourText.value);
       jHourText.value = (events[i]?events[i]:"");
     }
   }
 }
 
-function clearEvents(events) {
-  // This function clears all the stored events
-  // parameter "events" is the hourly events array
-
-  // create an empty version of the events array
-  let emptyEvents = []
-  for (let i = 0; i < 24; i++ ) emptyEvents.push(false);
-
-  return emptyEvents;
+function emptyEvents(hours, events) {
+  // empty out the main events array
+  for ( i = 0; i < events.length; i++ ) {
+    events[i] = false;
+  }
+  // save the empty array to localStorage
+  localStorage.setItem("events", JSON.stringify(events));
+  // re-render the calendar
+  renderEvents(hours, events);
 }
-
-
 // ---- END FUNCTION DECLARATIONS ----
 
 
