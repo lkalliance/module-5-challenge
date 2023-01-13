@@ -1,32 +1,48 @@
+/* In the code below, comments that are meant to identify what
+the code is doing or are identifying or wayfinding are denoted
+with "//" notation. Comments that are notes from the author are
+denoted with "/*" notation */
+
+/* The nature of the assignment is to refactor code without changing
+the UI design of the page. I was tempted to do things like create
+navigation to go from day to day, and to assign the saving function
+to the blur event of a textarea, but have opted not to in the spirit
+of the assignment. */
+
+
 // GLOBAL ASSIGNMENTS
 const firstHour = 9;    // identified as first hour to show
 const lastHour = 17;    // identified as last hour to show
 
+
+
 $(document).ready( function() {
   // This is the initialization function.
-  // Everything that isn't otherwise in a function will be called in this block
+  // Everything that isn't otherwise in a function will be called in this one
 
-  // grab some DOM elements
-  const jCal = $("#calendar");     // a reference to the calendar body
+  // grab some DOM elements and set some variables
+  const jCal = $("#calendar");       // a reference to the calendar body
   const jDate = $("#currentDay");    // will hold a reference to the date
-  let hourDivs;
-  let dCurrentHour;
+  let hourDivs;                      // will hold an array of the hour blocks
+  let hourEvents;                    // will hold an array of the contents of each hour
+  let dCurrentHour;                  // will be a reference to the current hour
   
   // determine today's date and place it on the page
   let dDate = dayjs();
   jDate.text(dDate.format('dddd, MMMM DD, YYYY'));
+  // record what hour it is
   dCurrentHour = dDate.hour();
 
   // draw the calendar's basic structure
-  // value returned is an array of the hour divs
+  // (value returned is an array of the hour divs)
   hourDivs = drawCal(jCal);
 
   // update the calendar to reflect the current time
-  updateTime(hourDivs, dDate.hour());
+  updateTime(hourDivs, dCurrentHour);
 
   // extract the localStorage
-  // value returned is an array of events
-  let hourEvents = extractStored(hourDivs);
+  // (value returned is an array of events)
+  hourEvents = extractStored(hourDivs);
 
   // place the events into the calendar
   renderEvents(hourDivs, hourEvents);
@@ -37,7 +53,7 @@ $(document).ready( function() {
     saveEvent(e, hourDivs, hourEvents);
   });
 
-  // once a second check if there is a new hour
+  // once-a-second check if there is a new hour
   let tickTock = setInterval( function() {
     dDate = dayjs();
     // is the current hour greater than the saved hour?
@@ -49,17 +65,27 @@ $(document).ready( function() {
 })
 
 
+
+// ---- FUNCTION DECLARATIONS ----
+
+
 function drawCal(jCalendar) {
   // This function clears out the calendar and re-draws its structure
   // parameter "calendar" is a reference to the calendar container
+
+  /* Coder's note: I thought a while about what way to go on this. I have
+  opted in the end to have the hour divs array and the stored events array
+  each have 24 members, and not just members that have elements to hold. 
+  That way I can tell just from the array index what hour is being referenced.
+  Hours that are not represented on the calendar are just listed as "false"
+  in the returned array. */
 
   let hours = [];
 
   // empty the calendar
   jCalendar.empty();
-
   // iterate through the hours of the day and render the ones as needed
-  let jHourDiv, jHourLabel, jHourText, jHourBtn;
+  let jHourDiv, jHourLabel, jHourText, jHourBtn, jHourI;
   for (let i = 0; i < 24; i++) {
     // only render if the hour is between the defined "business hours"
     if ( i >= firstHour && i<= lastHour) {
@@ -78,7 +104,10 @@ function drawCal(jCalendar) {
       // create the button for the hour
       jHourBtn = $("<button>");
       jHourBtn.addClass("btn saveBtn col-2 col-md-1");
-      jHourBtn.html('<i class="fas fa-save" aria-hidden="true"></i>');
+      jHourI = $("<i>");
+      jHourI.addClass("fas fa-save");
+      jHourI.attr("aria-hidden", "true");
+      jHourBtn.append(jHourI);
       // append the label, the textarea and the button to the main div
       jHourDiv.append(jHourLabel);
       jHourDiv.append(jHourText);
@@ -124,17 +153,30 @@ function saveEvent(e, hours, events) {
 
   e.preventDefault();
 
+  /* Coder's note: it was not literally necessary to identify
+  the textarea with "[0]", however against the possiblity of future
+  releases that feature multiple text areas in a calendar hour,
+  I've left that array index in. */
+
   let clickedHour;
   // determine which calendar hour was saved
   clickedHour = e.currentTarget.parentNode.id.split("-")[1];
   // store the contents of the textarea in the events array
-  events[clickedHour] = hours[clickedHour].children("textarea").val();
+  events[clickedHour] = hours[clickedHour].children("textarea")[0].value;
   localStorage.setItem("events", JSON.stringify(events));
 }
 
 function extractStored(hours) {
   // This function converts the stored events into an array
   // parameter "hours" is the array of hourly divs
+
+  /* Coder's note: As with the array of hours, I've opted to create
+  this array of events with 24 members, so that I can know the hour
+  associated with the event by the index.
+
+  I've also designed the code such that I only extract from localStorage
+  once; after that all the events are held in the array and that array is 
+  edited and then posted to localStorage with each save. */
 
   // create an empty array in case there are no saved events
   let emptyArray = [];
@@ -150,9 +192,9 @@ function extractStored(hours) {
 function renderEvents(hours, events) {
   // This function adds stored events to the calendar
   // parameter "hours" is the array of hour divs
-  // parameter "events" is the array of events
+  // parameter "events" is the array of eventsd
 
-  // now iterate over the divs and place the text there
+  // iterate over the divs and place the text there
   let jHourText;
   for ( let i = 0; i < hours.length; i++ ) {
     if ( hours[i] ) {
@@ -163,6 +205,7 @@ function renderEvents(hours, events) {
 }
 
 
+// ---- END FUNCTION DECLARATIONS ----
 
 
 
@@ -171,7 +214,8 @@ function renderEvents(hours, events) {
 
 
 
-/* ---- COMMENTS IN ORIGINAL FILE ---- */
+/* For posterity and reference, I've left here all of the comments
+that had been in the code at the start of the challenge */
 
 
 // Wrap all code that interacts with the DOM in a call to jQuery to ensure that
