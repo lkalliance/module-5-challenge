@@ -23,6 +23,7 @@ $(document).ready( function() {
   // grab some DOM elements and set some variables
   const jCal = $("#calendar");       // a reference to the calendar body
   const jDate = $("#currentDay");    // will hold a reference to the date
+  const jClear = $("#clearButton");  // a reference to the "clear items" button
   let hourDivs;                      // will hold an array of the hour blocks
   let hourEvents;                    // will hold an array of the contents of each hour
   let dCurrentHour;                  // will be a reference to the current hour
@@ -52,6 +53,12 @@ $(document).ready( function() {
     e.preventDefault();
     saveEvent(e, hourDivs, hourEvents);
   });
+
+  // attach a listener to the "Clear events" button
+  jClear.on("click", function(e) {
+    e.preventDefault();
+    emptyEvents(hourDivs, hourEvents);
+  })
 
   // once-a-second check if there is a new hour
   let tickTock = setInterval( function() {
@@ -161,17 +168,12 @@ function saveEvent(e, hours, events) {
   I do not just save the events, I save a date stamp as well, for 
   use with the extraction of the local storage */
 
-  let clickedHour, storageObject;
+  let clickedHour;
   // determine which calendar hour was saved
   clickedHour = e.currentTarget.parentNode.id.split("-")[1];
   // store the contents of the textarea in the events array
   events[clickedHour] = hours[clickedHour].children("textarea")[0].value;
-  // assemble and store a storage object with the date and the events array
-  storageObject = {
-    date: dayjs().toString().substring(0,16),
-    eventArray: events
-  }
-  localStorage.setItem("events", JSON.stringify(storageObject));
+  localStorage.setItem("events", JSON.stringify(events));
 }
 
 function extractStored(hours) {
@@ -192,20 +194,18 @@ function extractStored(hours) {
 
   // create an empty array in case there are no saved events
   let emptyArray = [];
-  let events;
   for ( let i = 0; i < 24; i++ ) emptyArray.push(false);
 
   // retrieve the saved event object and parse them if they exist
-  let storedEventObject = localStorage.getItem("events");
-  let parsedEventObject = storedEventObject?JSON.parse(storedEventObject):false;
+  let storedEvents = localStorage.getItem("events");
 
-  let today = dayjs().toString().substring(0,16);
-  if ( !parsedEventObject || parsedEventObject.date != today ) {
+  let events;
+  if ( !storedEvents ) {
     // is today a new day, or are there no stored events?
     events = emptyArray;
   } else {
     // grab the existing events array
-    events = parsedEventObject.eventArray;
+    events = JSON.parse(storedEvents);
   }
 
   return events;
@@ -217,16 +217,26 @@ function renderEvents(hours, events) {
   // parameter "events" is the array of eventsd
 
   // iterate over the divs and place the text there
+
   let jHourText;
   for ( let i = 0; i < hours.length; i++ ) {
     if ( hours[i] ) {
       jHourText = $(hours[i]).children("textarea")[0];
-      jHourText.textContent = (events[i]?events[i]:"");
+      jHourText.value = (events[i]?events[i]:"");
     }
   }
 }
 
-
+function emptyEvents(hours, events) {
+  // empty out the main events array
+  for ( i = 0; i < events.length; i++ ) {
+    events[i] = false;
+  }
+  // save the empty array to localStorage
+  localStorage.setItem("events", JSON.stringify(events));
+  // re-render the calendar
+  renderEvents(hours, events);
+}
 // ---- END FUNCTION DECLARATIONS ----
 
 
