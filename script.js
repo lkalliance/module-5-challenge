@@ -156,14 +156,22 @@ function saveEvent(e, hours, events) {
   /* Coder's note: it was not literally necessary to identify
   the textarea with "[0]", however against the possiblity of future
   releases that feature multiple text areas in a calendar hour,
-  I've left that array index in. */
+  I've left that array index in.
+  
+  I do not just save the events, I save a date stamp as well, for 
+  use with the extraction of the local storage */
 
-  let clickedHour;
+  let clickedHour, storageObject;
   // determine which calendar hour was saved
   clickedHour = e.currentTarget.parentNode.id.split("-")[1];
   // store the contents of the textarea in the events array
   events[clickedHour] = hours[clickedHour].children("textarea")[0].value;
-  localStorage.setItem("events", JSON.stringify(events));
+  // assemble and store a storage object with the date and the events array
+  storageObject = {
+    date: dayjs().toString().substring(0,16),
+    eventArray: events
+  }
+  localStorage.setItem("events", JSON.stringify(storageObject));
 }
 
 function extractStored(hours) {
@@ -174,19 +182,33 @@ function extractStored(hours) {
   this array of events with 24 members, so that I can know the hour
   associated with the event by the index.
 
+  I have designed the code to compare the stored date with today's date:
+  if the stored events weren't for today, then they are no longer relevant
+  and should not be stored any more.
+
   I've also designed the code such that I only extract from localStorage
   once; after that all the events are held in the array and that array is 
   edited and then posted to localStorage with each save. */
 
   // create an empty array in case there are no saved events
   let emptyArray = [];
+  let events;
   for ( let i = 0; i < 24; i++ ) emptyArray.push(false);
 
-  // get the raw data and parse it
-  let storedEvents = localStorage.getItem("events");
-  let parsedEvents = storedEvents?JSON.parse(storedEvents):emptyArray;
+  // retrieve the saved event object and parse them if they exist
+  let storedEventObject = localStorage.getItem("events");
+  let parsedEventObject = storedEventObject?JSON.parse(storedEventObject):false;
 
-  return parsedEvents;
+  let today = dayjs().toString().substring(0,16);
+  if ( !parsedEventObject || parsedEventObject.date != today ) {
+    // is today a new day, or are there no stored events?
+    events = emptyArray;
+  } else {
+    // grab the existing events array
+    events = parsedEventObject.eventArray;
+  }
+
+  return events;
 }
 
 function renderEvents(hours, events) {
