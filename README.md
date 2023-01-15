@@ -6,7 +6,8 @@ This is a web page that allows a user to interact with a daily calendar for the 
 
 You can access the page at [this location](https://lkalliance.github.io/module-5-challenge/).
 
-(screen shots here)
+<img src="./assets/images/work-day-scheduler.png" alt="Work Day Scheduler screenshot" width="500px">
+
 
 ## Usage
 
@@ -30,6 +31,10 @@ Whether this feature is a good addition or a bad one depends on how the applicat
 
 ## Credits
 
-I was not the original coder of the HTML and CSS; further, the site was built using the [jQuery Javascript library](https://jquery.com) and [Bootstrap dev framework](https://getbootstrap.com).
+I was not the original coder of the HTML and CSS; further, the site was built using the [jQuery Javascript library](https://jquery.com), the [Day.js javascript library](https://day.js.org) and [Bootstrap dev framework](https://getbootstrap.com).
 
 I coded all of the local javascript, with the usual occasional assistancde from [W3Schools](https://w3schools.com/), [MDN](https://developer.mozilla.org/en-US/), [Stack Overflow](https://stackoverflow.com), and other code developers around the Web.
+
+## License
+
+This code is published under the [MIT license](./LICENSE).
